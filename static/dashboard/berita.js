@@ -1,3 +1,19 @@
+//cek kategori
+const kategoriEl = document.querySelector("#kategori");
+(async () => {
+  const response = await fetch("/berita/kategori", {
+    method: "GET",
+  });
+  (await response.json()).forEach((el) => {
+    const optionEl = document.createElement("option");
+    optionEl.setAttribute("value", el.kategori);
+    optionEl.textContent =
+      el.kategori.charAt(0).toUpperCase() + el.kategori.slice(1);
+    kategoriEl.appendChild(optionEl);
+  });
+})();
+
+//hapus berita
 deleteBerita = async (rowid) => {
   const response = await fetch("/berita", {
     method: "DELETE",
@@ -9,6 +25,7 @@ deleteBerita = async (rowid) => {
   });
 };
 
+//render berita
 renderBerita = async () => {
   const table = document.querySelector("tbody#berita");
   table.textContent = "";
@@ -38,8 +55,8 @@ renderBerita = async () => {
 };
 renderBerita();
 
+//berita baru
 const judulEl = document.querySelector("#judul");
-const kategoriEl = document.querySelector("#kategori");
 const isiEl = document.querySelector("#isi");
 const submitEl = document.querySelector("#submit");
 submit = async () => {

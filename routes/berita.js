@@ -5,6 +5,12 @@ const router = express.Router();
 router.use(express.json());
 router.use(express.text());
 
+//lihat kategori
+router.get("/kategori", async (req, res) => {
+  const kategori = await db.all("SELECT * FROM kategori");
+  res.json(kategori);
+});
+
 //lihat berita
 router.get("/", async (req, res) => {
   res.json(await db.all(`SELECT rowid, * FROM berita;`));
