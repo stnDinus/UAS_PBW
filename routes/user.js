@@ -2,6 +2,8 @@ const express = require("express");
 const { db } = require("../server");
 const router = express.Router();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 router.use(express.json());
 
@@ -35,8 +37,27 @@ router.post("/signUp", async (req, res) => {
   if (checkUsername && checkPassword) {
     //hash password
     const hash = await bcrypt.hash(password, 10);
-    db.run(`INSERT INTO user VALUES ('${username}', '${hash}', 0)`);
+    db.run(`INSERT INTO user VALUES ('${username}', '${hash}')`);
     res.sendStatus(200);
+  } else {
+    res.sendStatus(406);
+  }
+});
+
+router.post("/login", async (req, res) => {
+  const inputUsername = req.body.username;
+  const inputPassword = req.body.password;
+
+  const password = await db.get(
+    `SELECT password FROM user WHERE username = '${inputUsername}'`
+  );
+
+  if (password && (await bcrypt.compare(inputPassword, password.password))) {
+    const accessToken = jwt.sign(
+      { username: inputUsername },
+      process.env["ACCESS_TOKEN_SECRET"]
+    );
+    res.send(accessToken);
   } else {
     res.sendStatus(406);
   }

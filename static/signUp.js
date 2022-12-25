@@ -105,6 +105,12 @@ signUp = async () => {
         password: password,
       }),
     });
+
+    if (response.status === 200) {
+      window.location.replace("/login.html");
+    } else {
+      console.log("error");
+    }
   }
 };
 document.querySelector("#signUp").addEventListener("click", signUp);

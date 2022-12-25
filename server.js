@@ -1,6 +1,8 @@
 const express = require("express");
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 (async () => {
   const db = await open({
@@ -8,18 +10,18 @@ const { open } = require("sqlite");
     driver: sqlite3.Database,
   });
 
+  db.run("PRAGMA foreign_keys = ON");
   //tabel user
   db.run(`
   CREATE TABLE IF NOT EXISTS user (
     username TEXT,
-    password TEXT,
-    isAdmin INTEGER
+    password TEXT
   )
 `);
   //tabel kategori
   db.run(`
   CREATE TABLE IF NOT EXISTS kategori (
-    kategori TEXT
+    kategori TEXT PRIMARY KEY
   )
 `);
   //tabel berita
@@ -62,14 +64,27 @@ const { open } = require("sqlite");
   )
 `);
 
-  module.exports = { db };
+  checkAuth = (token) => {
+    try {
+      const status = jwt.verify(token, process.env["ACCESS_TOKEN_SECRET"]);
+      return status;
+    } catch (error) {
+      return error;
+    }
+  };
+
+  module.exports = { db, checkAuth };
 
   const app = express();
 
+  //konten static
   app.use(express.static("static"));
 
-  const userRouter = require("./routes/user");
-  app.use("/user", userRouter);
+  //routing /uesr/*
+  app.use("/user", require("./routes/user"));
+
+  //routing /berita/*
+  app.use("/berita", require("./routes/berita"));
 
   const port = 80;
   app.listen(port, () => {
