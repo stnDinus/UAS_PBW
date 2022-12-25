@@ -14,7 +14,7 @@ require("dotenv").config();
   //tabel user
   db.run(`
   CREATE TABLE IF NOT EXISTS user (
-    username TEXT,
+    username TEXT PRIMARY KEY,
     password TEXT
   )
 `);
@@ -64,12 +64,19 @@ require("dotenv").config();
   )
 `);
 
-  checkAuth = (token) => {
+  checkAuth = async (token) => {
     try {
       const status = jwt.verify(token, process.env["ACCESS_TOKEN_SECRET"]);
-      return status;
+      if (
+        await db.get(
+          `SELECT username FROM user WHERE username = '${status.username}'`
+        )
+      ) {
+        return status;
+      }
+      throw "username tidak ada di database";
     } catch (error) {
-      return error;
+      return 0;
     }
   };
 

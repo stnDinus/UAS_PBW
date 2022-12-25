@@ -39,16 +39,14 @@ renderBerita = async () => {
     const rowid = row.insertCell(0);
     const judul = row.insertCell(1);
     const kategori = row.insertCell(2);
-    const isi = row.insertCell(3);
-    const del = row.insertCell(4);
+    const del = row.insertCell(3);
 
     rowid.textContent = el.rowid;
     judul.textContent = el.judul;
     kategori.textContent = el.kategori;
-    isi.textContent = el.isi;
     del.textContent = "Delete";
-    del.addEventListener("click", () => {
-      deleteBerita(el.rowid);
+    del.addEventListener("click", async () => {
+      await deleteBerita(el.rowid);
       renderBerita();
     });
   });

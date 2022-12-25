@@ -11,9 +11,9 @@ router.get("/kategori", async (req, res) => {
   res.json(kategori);
 });
 
-//lihat berita
+//lihat semua berita
 router.get("/", async (req, res) => {
-  res.json(await db.all(`SELECT rowid, * FROM berita;`));
+  res.json(await db.all(`SELECT rowid, judul, kategori FROM berita;`));
 });
 
 //berita baru
@@ -29,7 +29,7 @@ router.post("/", async (req, res) => {
     return;
   }
   //cek error
-  if (!checkAuth(token).error) {
+  if (await checkAuth(token)) {
     try {
       await db.run(
         `INSERT INTO berita VALUES ('${judul}', '${kategori}', '${isi}')`
@@ -48,10 +48,10 @@ router.post("/", async (req, res) => {
   res.sendStatus(403);
 });
 
-//hapu berita
+//hapus berita
 router.delete("/", async (req, res) => {
   const token = req.headers.authorization;
-  if (!checkAuth(token).error) {
+  if (await checkAuth(token)) {
     const id = req.body;
     try {
       await db.run(`DELETE FROM berita WHERE rowid = '${id}'`);
@@ -63,6 +63,14 @@ router.delete("/", async (req, res) => {
     return;
   }
   res.sendStatus(401);
+});
+
+//lihat berita
+router.get("/:id", async (req, res) => {
+  const berita = await db.get(
+    `SELECT * FROM berita WHERE rowid = '${req.params.id}'`
+  );
+  res.json(berita);
 });
 
 module.exports = router;
