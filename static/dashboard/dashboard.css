@@ -1,0 +1,25 @@
+body {
+  display: flex;
+}
+
+nav {
+  width: 300px;
+  --margin: 2vh;
+  margin: var(--margin);
+  height: calc(100vh - var(--margin) * 2);
+}
+
+nav > div[value] {
+  cursor: pointer;
+}
+
+#root {
+  width: calc(100vw - 300px);
+  --margin: 2vh;
+  margin: var(--margin);
+  height: calc(100vh - var(--margin) * 2);
+}
+
+#tabelBerita {
+  width: 100%;
+}

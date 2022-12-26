@@ -73,4 +73,24 @@ router.get("/:id", async (req, res) => {
   res.json(berita);
 });
 
+//update berita
+router.put("/:id", async (req, res) => {
+  if (checkAuth(req.headers.authorization)) {
+    const rowid = req.params.id;
+    const judul = req.body.judul;
+    const kategori = req.body.kategori;
+    const isi = req.body.isi;
+
+    console.log(rowid, judul, kategori, isi);
+
+    db.run(`
+    UPDATE berita
+    SET judul = '${judul}', kategori = '${kategori}', isi = '${isi}'
+    WHERE rowid = '${rowid}'`);
+    res.sendStatus(200);
+  } else {
+    res.sendStatus(401);
+  }
+});
+
 module.exports = router;
