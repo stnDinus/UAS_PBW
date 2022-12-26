@@ -13,7 +13,7 @@ router.get("/kategori", async (req, res) => {
 
 //lihat semua berita
 router.get("/", async (req, res) => {
-  res.json(await db.all(`SELECT rowid, judul, kategori FROM berita;`));
+  res.json(await db.all(`SELECT * FROM berita;`));
 });
 
 //berita baru
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
   if (await checkAuth(token)) {
     try {
       await db.run(
-        `INSERT INTO berita VALUES ('${judul}', '${kategori}', '${isi}')`
+        `INSERT INTO berita (judul, kategori, isi) VALUES ('${judul}', '${kategori}', '${isi}')`
       );
     } catch (error) {
       switch (error.errno) {
@@ -54,7 +54,7 @@ router.delete("/", async (req, res) => {
   if (await checkAuth(token)) {
     const id = req.body;
     try {
-      await db.run(`DELETE FROM berita WHERE rowid = '${id}'`);
+      await db.run(`DELETE FROM berita WHERE id = '${id}'`);
     } catch {
       res.sendStatus(400);
       return;
@@ -68,7 +68,7 @@ router.delete("/", async (req, res) => {
 //lihat berita
 router.get("/:id", async (req, res) => {
   const berita = await db.get(
-    `SELECT * FROM berita WHERE rowid = '${req.params.id}'`
+    `SELECT * FROM berita WHERE id = '${req.params.id}'`
   );
   res.json(berita);
 });
@@ -76,17 +76,15 @@ router.get("/:id", async (req, res) => {
 //update berita
 router.put("/:id", async (req, res) => {
   if (checkAuth(req.headers.authorization)) {
-    const rowid = req.params.id;
+    const id = req.params.id;
     const judul = req.body.judul;
     const kategori = req.body.kategori;
     const isi = req.body.isi;
 
-    console.log(rowid, judul, kategori, isi);
-
     db.run(`
     UPDATE berita
     SET judul = '${judul}', kategori = '${kategori}', isi = '${isi}'
-    WHERE rowid = '${rowid}'`);
+    WHERE id = '${id}'`);
     res.sendStatus(200);
   } else {
     res.sendStatus(401);

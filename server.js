@@ -27,10 +27,11 @@ require("dotenv").config();
   //tabel berita
   db.run(`
   CREATE TABLE IF NOT EXISTS berita (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     judul TEXT,
     kategori TEXT,
     isi TEXT,
-    FOREIGN KEY(kategori) REFERENCES kategori(kategori)
+    FOREIGN KEY(kategori) REFERENCES kategori(kategori) ON DELETE CASCADE ON UPDATE CASCADE
   )
 `);
   //tabel vkegiatan
@@ -58,9 +59,11 @@ require("dotenv").config();
   db.run(`
   CREATE TABLE IF NOT EXISTS komentar (
     oleh TEXT,
+    beritaId INTEGER,
     isi TEXT,
     waktu TEXT,
-    FOREIGN KEY(oleh) REFERENCES user(nama)
+    FOREIGN KEY(oleh) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(beritaId) REFERENCES berita(id) ON DELETE CASCADE ON UPDATE CASCADE
   )
 `);
 
@@ -92,6 +95,9 @@ require("dotenv").config();
 
   //routing /berita/*
   app.use("/berita", require("./routes/berita"));
+
+  //routing /komentar/*
+  app.use("/komentar", require("./routes/komentar"));
 
   const port = 80;
   app.listen(port, () => {

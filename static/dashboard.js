@@ -24,7 +24,7 @@ $(document).ready(() => {
           <th class="text-right">#</th>
           <th>Judul</th>
           <th>Kategori</th>
-          <th>Delete</th>
+          <th class="text-center" style='width: 3em;'>Delete</th>
         </thead>`,
       tbody
     );
@@ -44,25 +44,24 @@ $(document).ready(() => {
       response.forEach((el) => {
         const tr = $(`<tr ></tr>`);
 
-        const id = $(`<th class="text-right">${el.rowid}</th>`);
+        const id = $(`<th class="text-right">${el.id}</th>`);
         const judul = $(`<td style="cursor: pointer;">${el.judul}</td>`);
-        judul.on("click", () => renderBeritaId(el.rowid));
+        judul.on("click", () => renderBeritaId(el.id));
         const kategori = $(`<td>${el.kategori}</td>`);
-        const del = $(`<td></td>`).append(
-          $("<button class='btn btn-danger'>Delete</button>").on(
-            "click",
-            async () => {
-              await fetch("/berita", {
-                method: "DELETE",
-                headers: {
-                  authorization: localStorage["token"],
-                  "Content-Type": "text/plain",
-                },
-                body: el.rowid,
-              });
-              renderTbody();
-            }
-          )
+        const del = $(`<td class="d-flex justify-content-center"></td>`).append(
+          $(
+            "<button class='btn btn-danger'><i class='bi bi-trash'></i></button>"
+          ).on("click", async () => {
+            await fetch("/berita", {
+              method: "DELETE",
+              headers: {
+                authorization: localStorage["token"],
+                "Content-Type": "text/plain",
+              },
+              body: el.id,
+            });
+            renderTbody();
+          })
         );
 
         tr.append(id, judul, kategori, del);
@@ -211,8 +210,50 @@ $(document).ready(() => {
 
     form.append(groupJudul, groupKategori, groupIsi, update);
 
+    //render komentar
+    const renderKomentar = async () => {
+      const container = $("<div class='mt-3'></div>");
+
+      const komentar = await (await fetch(`/komentar?beritaId=${id}`)).json();
+
+      container.append($(`<h4>${komentar.length} komentar</h4>`));
+
+      komentar.forEach((el) => {
+        const komen = $(
+          "<div class='d-flex justify-content-between mb-3 p-2 rounded-lg bg-secondary'></div>"
+        );
+
+        const oleh = $(`<div class="font-weight-bold">${el.oleh}</div>`);
+        const isi = $(`<div>${el.isi}</div>`);
+        const waktu = $(`<div class='ml-2 font-italic'>@${el.waktu}</div>`);
+        komen.append(
+          $("<div></div>").append(
+            $("<div class='d-flex'></div>").append(oleh, waktu),
+            isi
+          ),
+          $(
+            '<button class="btn ml-3 btn-danger"><i class="bi bi-trash"></i></button>'
+          ).on("click", async () => {
+            await fetch(`/komentar/${el.rowid}`, {
+              method: "DELETE",
+              headers: {
+                authorization: localStorage["token"],
+              },
+            });
+            container.text("");
+            renderKomentar();
+          })
+        );
+
+        container.append(komen);
+      });
+
+      root.append(container);
+    };
+    renderKomentar();
+
     root.append(form);
   };
 
-  $("#beritaNav").click();
+  navButtons[0].click();
 });
