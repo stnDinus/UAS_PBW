@@ -141,7 +141,7 @@ $(document).ready(() => {
     root.text("");
 
     const kembali = $(
-      '<button class="btn btn-primary"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>'
+      '<button class="btn btn-danger"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>'
     );
     kembali.on("click", () => {
       root.text("");
@@ -149,7 +149,7 @@ $(document).ready(() => {
     });
     root.append(
       $(
-        "<div class='d-flex justify-content-between mb-3 pb-2 border-bottom border-secondary'></div>"
+        "<div class='d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary'></div>"
       ).append(kembali, "<span class='h1 px-3'>Edit Berita</span>")
     );
 
@@ -220,7 +220,7 @@ $(document).ready(() => {
 
       komentar.forEach((el) => {
         const komen = $(
-          "<div class='d-flex justify-content-between mb-3 p-2 rounded-lg bg-secondary'></div>"
+          "<div class='d-flex justify-content-between align-items-start mb-3 p-2 rounded-lg bg-secondary'></div>"
         );
 
         const oleh = $(`<div class="font-weight-bold">${el.oleh}</div>`);

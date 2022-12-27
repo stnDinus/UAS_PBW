@@ -17,10 +17,24 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.post("/new", async (req, res) => {
+  const oleh = (await checkAuth(req.headers.authorization)).username;
+  if (oleh) {
+    const beritaId = req.body.beritaId;
+    const isi = req.body.isi;
+
+    isi &&
+      (await db.run(
+        `INSERT INTO komentar VALUES ('${oleh}', '${beritaId}', '${isi}', datetime('now'))`
+      ));
+  }
+  res.end();
+});
+
 router.delete("/:id", async (req, res) => {
   const rowid = req.params.id;
   const auth = req.headers.authorization;
-  if (rowid && checkAuth(auth)) {
+  if (rowid && (await checkAuth(auth))) {
     await db.run(`DELETE FROM komentar WHERE rowid = '${rowid}'`);
   }
   res.end();

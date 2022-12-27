@@ -1,0 +1,57 @@
+:root {
+  --blue: #8bc6ec;
+  --black: #121416;
+  --dark: #25292d;
+}
+body {
+  display: flex;
+  background-color: var(--black);
+  justify-content: center;
+}
+#root {
+  width: 1000px;
+  background-color: var(--dark);
+}
+header > h1 {
+  padding: 10px;
+  font-family: serif;
+}
+a,
+a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+nav > a {
+  flex: auto;
+  padding: 10px;
+  text-align: center;
+}
+nav > a:hover {
+  color: black;
+  background-color: var(--blue);
+}
+
+#about {
+  background-color: #8bc6ec;
+  background-image: linear-gradient(135deg, #8bc6ec 0%, #9599e2 100%);
+}
+
+#isiBerita > .card {
+  width: 200px;
+  margin: 10px;
+  background-color: var(--dark);
+}
+
+#isiBerita button {
+  background-color: var(--blue);
+}
+
+#modal {
+  display: flex;
+  position: fixed;
+  background-color: hsla(0, 0%, 0%, 0.5);
+  justify-content: center;
+  align-items: center;
+  width: 100vw;
+  height: 100vh;
+}

@@ -14,8 +14,8 @@ require("dotenv").config();
   //tabel user
   db.run(`
   CREATE TABLE IF NOT EXISTS user (
-    username TEXT PRIMARY KEY,
-    password TEXT
+    username TEXT PRIMARY KEY NOT NULL,
+    password TEXT NOT NULL
   )
 `);
   //tabel kategori
@@ -58,9 +58,9 @@ require("dotenv").config();
   //tabel komentar
   db.run(`
   CREATE TABLE IF NOT EXISTS komentar (
-    oleh TEXT,
+    oleh TEXT NOT NULL,
     beritaId INTEGER,
-    isi TEXT,
+    isi TEXT NOT NULL,
     waktu TEXT,
     FOREIGN KEY(oleh) REFERENCES user(username) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY(beritaId) REFERENCES berita(id) ON DELETE CASCADE ON UPDATE CASCADE
