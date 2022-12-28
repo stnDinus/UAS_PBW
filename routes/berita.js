@@ -13,7 +13,11 @@ router.get("/kategori", async (req, res) => {
 
 //lihat semua berita
 router.get("/", async (req, res) => {
-  res.json(await db.all(`SELECT * FROM berita;`));
+  res.json(
+    await db.all(
+      `SELECT id, judul, kategori, substr(isi, 1, 50) AS isi FROM berita`
+    )
+  );
 });
 
 //berita baru

@@ -13,26 +13,33 @@ $(document).ready(async () => {
     const cardButton = $(`<button class="btn">Baca</button>`).on(
       "click",
       async () => {
-        const modal = $("<div id='modal'></div>");
+        const berita = await (await fetch(`/berita/${el.id}`)).json();
+
+        const modal = $("<div id='modal' class='overflow-auto'></div>").on(
+          "click",
+          function (e) {
+            if (e.target === this) {
+              modal.remove();
+            }
+          }
+        );
 
         const container = $(
-          "<div class='bg-dark text-light rounded-lg container'></div>"
+          "<div class='bg-dark text-light overflow-auto rounded-lg container'></div>"
         );
 
         const kembali = $(
           '<button class="btn btn-danger"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>'
         );
-        kembali.on("click", () => {
-          modal.remove();
-        });
+        kembali.on("click", () => modal.remove());
 
-        const judul = $(`<h1 class="my-3 ml-3">${el.judul}</h1>`);
+        const judul = $(`<h1 class="my-3 ml-3">${berita.judul}</h1>`);
 
         const kategori = $(
-          `<div class="badge badge-secondary my-3">${el.kategori}</div>`
+          `<div class="badge badge-secondary my-3">${berita.kategori}</div>`
         );
 
-        const isi = $(`<p class='my-3'>${el.isi}</p>`);
+        const isi = $(`<p class='my-3'">${berita.isi}</p>`);
 
         const isiKomentar = $(
           '<textarea id="komentarBaru" class="w-100"></textarea>'
@@ -47,7 +54,7 @@ $(document).ready(async () => {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              beritaId: el.id,
+              beritaId: berita.id,
               isi: isiKomentar.val(),
             }),
           });
@@ -67,7 +74,7 @@ $(document).ready(async () => {
         const komentarContainer = $(`<div class='mt-3'></div>`);
         const renderKomentar = async () => {
           const komentar = await (
-            await fetch(`/komentar?beritaId=${el.id}`)
+            await fetch(`/komentar?beritaId=${berita.id}`)
           ).json();
 
           komentarContainer.append($(`<h4>${komentar.length} komentar</h4>`));
