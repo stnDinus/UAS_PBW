@@ -1,5 +1,10 @@
+:root {
+  --black: #121416;
+}
+
 body {
   display: flex;
+  background-color: var(--black);
 }
 
 nav {
@@ -22,4 +27,11 @@ nav > div[value] {
 
 #tabelBerita {
   width: 100%;
+}
+
+.drop-area {
+  border-style: dashed;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }

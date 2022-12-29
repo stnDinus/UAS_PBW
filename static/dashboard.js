@@ -11,6 +11,9 @@ $(document).ready(() => {
       case "berita":
         renderBerita();
         break;
+      case "galeri":
+        renderGaleri();
+        break;
     }
   });
 
@@ -149,7 +152,7 @@ $(document).ready(() => {
     });
     root.append(
       $(
-        "<div class='d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary'></div>"
+        "<header class='d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary'></header>"
       ).append(kembali, "<span class='h1 px-3'>Edit Berita</span>")
     );
 
@@ -255,5 +258,122 @@ $(document).ready(() => {
     root.append(form);
   };
 
-  navButtons[0].click();
+  const renderGaleri = async () => {
+    const header = $(
+      `<header class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary"></header>`
+    );
+    const kembali = $(
+      `<button class="btn btn-danger"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>`
+    );
+    header.append(kembali, $(`<span class="h1 px-3">Gambar Baru</span>`));
+
+    let imageFile;
+
+    const setFileAsBackground = () => {
+      const imgURL = URL.createObjectURL(imageFile);
+      dropArea.css("background-image", `url(${imgURL})`);
+    };
+
+    const dropArea = $(
+      `<div class="w-100 h-50 rounded-lg border-secondary drop-area"></div>`
+    )
+      .on("dragover", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+      })
+      .on("drop", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        const fileList = event.originalEvent.dataTransfer.files;
+        if ((fileList.length = 1 && /^image/.test(fileList[0].type))) {
+          imageFile = fileList[0];
+          setFileAsBackground();
+        }
+      });
+
+    const fileInput = $(
+      `<input id="fileInput" type="file" accept="image/*" class="custom-file-input w-100 h-100" style="cursor: pointer;">`
+    ).on("change", (e) => {
+      const file = e.target.files[0];
+      if (/^image/.test(file.type)) {
+        imageFile = file;
+        setFileAsBackground();
+      }
+    });
+
+    dropArea.append(fileInput);
+
+    const form = $("<div class='mt-3'></div>");
+
+    const groupNama = $("<div class='form-group'></div>");
+    const labelNama = $("<label for='judul'>Nama</label>");
+    const inputNama = $(
+      "<input id='judul' class='form-control' type='text' placeholder='Nama Gambar'>"
+    );
+    groupNama.append(labelNama, inputNama);
+
+    const groupDeskripsi = $("<div class='form-group'></div>");
+    const labelDesripsi = $("<label for='judul'>Deskripsi</label>");
+    const inputDeskripsi = $(
+      "<input id='judul' class='form-control' type='text' placeholder='Deskripsi Gambar'>"
+    );
+    groupDeskripsi.append(labelDesripsi, inputDeskripsi);
+
+    const submit = $(`<button class="btn btn-primary">Submit</button>`).on(
+      "click",
+      async () => {
+        const nama = inputNama.val();
+        const deskripsi = inputDeskripsi.val();
+        let imageData;
+        let thumbnail;
+
+        const fr = new FileReader();
+        fr.readAsDataURL(imageFile);
+        fr.onload = () => {
+          //image
+          imageData = fr.result;
+
+          //thumbnail
+          const canvas = $(`<canvas width=480 height=270></canvas>`)[0];
+          const ctx = canvas.getContext("2d");
+          const imgEl = $(`<img src="${imageData}">`)[0];
+
+          imgEl.onload = () => {
+            let h = imgEl.height;
+            let w = imgEl.width;
+            const ratio = w / h;
+
+            h = 270;
+            w = 270 * ratio;
+
+            ctx.drawImage(imgEl, (480 - w) / 2, 0, w, h);
+            thumbnail = canvas.toDataURL(imgEl.type);
+
+            $("#root").append($(`<img src="${thumbnail}">`));
+          };
+        };
+
+        //console.log(blob);
+
+        //fetch("/galeri/new", {
+        //method: "POST",
+        //headers: {
+        //"Content-Type": "application/json",
+        //authorization: localStorage["token"],
+        //},
+        //body: JSON.stringify({
+        //nama: nama,
+        //blob: blob,
+        //deskripsi: deskripsi,
+        //}),
+        //});
+      }
+    );
+
+    form.append(groupNama, groupDeskripsi, submit);
+
+    root.append(header, dropArea, form);
+  };
+
+  navButtons[1].click();
 });

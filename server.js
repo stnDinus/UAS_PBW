@@ -44,8 +44,9 @@ require("dotenv").config();
   //tabel galeri
   db.run(`
   CREATE TABLE IF NOT EXISTS galeri (
-    judul TEXT,
-    link TEXT
+    nama TEXT,
+    blob BLOB,
+    deskripsi TEXT
   )
 `);
   //tabel aduan
@@ -98,6 +99,9 @@ require("dotenv").config();
 
   //routing /komentar/*
   app.use("/komentar", require("./routes/komentar"));
+
+  //routing /galeri/*
+  app.use("/galeri", require("./routes/galeri"));
 
   const port = 80;
   app.listen(port, () => {
