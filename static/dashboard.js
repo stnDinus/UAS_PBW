@@ -258,13 +258,16 @@ $(document).ready(() => {
     root.append(form);
   };
 
-  const renderGaleri = async () => {
+  const gambarBaru = async () => {
     const header = $(
       `<header class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary"></header>`
     );
     const kembali = $(
       `<button class="btn btn-danger"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>`
-    );
+    ).on("click", () => {
+      $("#root").text("");
+      renderGaleri();
+    });
     header.append(kembali, $(`<span class="h1 px-3">Gambar Baru</span>`));
 
     let imageFile;
@@ -324,55 +327,181 @@ $(document).ready(() => {
       async () => {
         const nama = inputNama.val();
         const deskripsi = inputDeskripsi.val();
-        let imageData;
-        let thumbnail;
+
+        //cek input kosong
+        if (!nama) {
+          console.log("nama kosong");
+          return;
+        }
+        if (!deskripsi) {
+          console.log("deskripsi kosong");
+          return;
+        }
+        if (!imageFile) {
+          console.log("gambar kosong");
+          return;
+        }
 
         const fr = new FileReader();
         fr.readAsDataURL(imageFile);
-        fr.onload = () => {
+        fr.onload = async () => {
           //image
-          imageData = fr.result;
+          const imageData = fr.result;
 
           //thumbnail
           const canvas = $(`<canvas width=480 height=270></canvas>`)[0];
           const ctx = canvas.getContext("2d");
-          const imgEl = $(`<img src="${imageData}">`)[0];
+          const img = await createImageBitmap(imageFile);
 
-          imgEl.onload = () => {
-            let h = imgEl.height;
-            let w = imgEl.width;
-            const ratio = w / h;
+          let h = img.height;
+          let w = img.width;
+          const ratio = w / h;
 
-            h = 270;
-            w = 270 * ratio;
+          h = 270;
+          w = 270 * ratio;
 
-            ctx.drawImage(imgEl, (480 - w) / 2, 0, w, h);
-            thumbnail = canvas.toDataURL(imgEl.type);
+          ctx.drawImage(img, (480 - w) / 2, 0, w, h);
+          const thumbnail = canvas.toDataURL();
 
-            $("#root").append($(`<img src="${thumbnail}">`));
-          };
+          fetch("/galeri/new", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: localStorage["token"],
+            },
+            body: JSON.stringify({
+              nama: nama,
+              image: imageData,
+              thumbnail: thumbnail,
+              deskripsi: deskripsi,
+            }),
+          });
         };
-
-        //console.log(blob);
-
-        //fetch("/galeri/new", {
-        //method: "POST",
-        //headers: {
-        //"Content-Type": "application/json",
-        //authorization: localStorage["token"],
-        //},
-        //body: JSON.stringify({
-        //nama: nama,
-        //blob: blob,
-        //deskripsi: deskripsi,
-        //}),
-        //});
       }
     );
 
     form.append(groupNama, groupDeskripsi, submit);
 
     root.append(header, dropArea, form);
+  };
+
+  const renderGaleri = async () => {
+    const container = $(
+      `<div class="d-flex flex-wrap justify-content-center"></div>`
+    );
+
+    const thumbnails = await (await fetch("/galeri")).json();
+
+    thumbnails.forEach((thumbnail) => {
+      const card = $(
+        `<div class="card w-25 m-3 bg-dark" style="cursor: pointer;"></div>`
+      ).on("click", () => renderGambar(thumbnail.rowid));
+      const cardImage = $(
+        `<img class="card-img-top bg-black" src="${thumbnail.thumbnail}">`
+      );
+      const cardBody = $(`<div class="card-body"></div>`);
+      const cardTitle = $(
+        `<div class="d-flex justify-content-between align-items-center card-title border-secondary border-bottom pb-2 h5">${thumbnail.nama}</div>`
+      );
+      const cardText = $(
+        `<div class="card-text text-muted">${thumbnail.deskripsi.slice(0, 40)}${
+          thumbnail.deskripsi.length > 40 ? "..." : ""
+        }</div>`
+      );
+      //hapus gambar
+      const cardDelete = $(
+        `<button class="btn btn-danger"><i class='bi bi-trash'></i></button>`
+      ).on("click", async () => {
+        await fetch(`/galeri/${thumbnail.rowid}`, {
+          method: "DELETE",
+          headers: {
+            authorization: localStorage["token"],
+          },
+        });
+        $("#root").text("");
+        renderGaleri();
+      });
+      cardTitle.append(cardDelete);
+      cardBody.append(cardTitle, cardText);
+      card.append(cardImage, cardBody);
+      container.append(card);
+    });
+
+    //tombol gambar baru
+    const card = $(
+      `<div class="gambar-baru card w-25 m-3 d-flex justify-content-center align-items-center"><i class="bi bi-file-plus h1"></i>Gambar Baru</div>`
+    ).on("click", () => {
+      $("#root").text("");
+      gambarBaru();
+    });
+    container.append(card);
+
+    $("#root").append(container);
+  };
+
+  const renderGambar = async (id) => {
+    $("#root").text("");
+
+    const response = await (await fetch(`/galeri/${id}`)).json();
+
+    const header = $(
+      `<header class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary"></header>`
+    );
+    const kembali = $(
+      `<button class="btn btn-danger"><i class="bi bi-arrow-left mr-3"></i>Kembali</button>`
+    ).on("click", () => {
+      $("#root").text("");
+      renderGaleri();
+    });
+    header.append(kembali, $(`<span class="h1 px-3">Update Gambar</span>`));
+
+    const gambar = $(`<img src="${response.image}" class="w-100">`);
+
+    const form = $("<div></div>");
+    const groupNama = $("<div class='form-group'></div>");
+    const labelNama = $("<label for='judul'>Nama</label>");
+    const inputNama = $(
+      "<input id='judul' class='form-control' type='text' placeholder='Nama Gambar'>"
+    ).val(response.nama);
+    groupNama.append(labelNama, inputNama);
+    const groupDeskripsi = $("<div class='form-group'></div>");
+    const labelDesripsi = $("<label for='judul'>Deskripsi</label>");
+    const inputDeskripsi = $(
+      "<input id='judul' class='form-control' type='text' placeholder='Deskripsi Gambar'>"
+    ).val(response.deskripsi);
+    groupDeskripsi.append(labelDesripsi, inputDeskripsi);
+    const update = $(`<button class="btn btn-primary">Update</button>`).on(
+      "click",
+      async () => {
+        const nama = inputNama.val();
+        const deskripsi = inputDeskripsi.val();
+
+        //cek kosong
+        if (!nama) {
+          console.log("nama kosong");
+          return;
+        }
+        if (!deskripsi) {
+          console.log("deskripsi kosong");
+          return;
+        }
+
+        await fetch(`/galeri/${response.rowid}`, {
+          method: "PUT",
+          headers: {
+            authorization: localStorage["token"],
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            nama: nama,
+            deskripsi: deskripsi,
+          }),
+        });
+      }
+    );
+    form.append(groupNama, groupDeskripsi, update);
+
+    $("#root").append(header, gambar, form);
   };
 
   navButtons[1].click();

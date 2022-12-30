@@ -1,8 +1,17 @@
 :root {
   --blue: #8bc6ec;
   --black: #121416;
-  --dark: #25292d;
+  --darker: #25292d;
 }
+
+.bg-black {
+  background-color: var(--black);
+}
+
+.bg-darker {
+  background-color: var(--darker);
+}
+
 body {
   display: flex;
   background-color: var(--black);
@@ -10,7 +19,7 @@ body {
 }
 #root {
   width: 1000px;
-  background-color: var(--dark);
+  background-color: var(--darker);
 }
 header > h1 {
   padding: 10px;
@@ -39,7 +48,7 @@ nav > a:hover {
 #isiBerita > .card {
   width: 200px;
   margin: 10px;
-  background-color: var(--dark);
+  background-color: var(--darker);
 }
 
 #isiBerita button {

@@ -1,5 +1,14 @@
 :root {
   --black: #121416;
+  --darker: #25292d;
+}
+
+.bg-black {
+  background-color: var(--black);
+}
+
+.bg-darker {
+  background-color: var(--darker);
 }
 
 body {
@@ -34,4 +43,18 @@ nav > div[value] {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+.gambar-baru {
+  background-color: #57cc9980;
+  transition: background-color 0.3s;
+  min-height: 200px;
+  border-style: dashed;
+  border-width: 3px;
+  border-color: #57cc99;
+  cursor: pointer;
+}
+
+.gambar-baru:hover {
+  background-color: #57cc99;
 }

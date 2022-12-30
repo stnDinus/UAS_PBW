@@ -45,7 +45,8 @@ require("dotenv").config();
   db.run(`
   CREATE TABLE IF NOT EXISTS galeri (
     nama TEXT,
-    blob BLOB,
+    image BLOB,
+    thumbnail BLOB,
     deskripsi TEXT
   )
 `);
