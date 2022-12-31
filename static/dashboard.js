@@ -14,6 +14,9 @@ $(document).ready(() => {
       case "galeri":
         renderGaleri();
         break;
+      case "video":
+        renderVideo();
+        break;
     }
   });
 
@@ -504,5 +507,61 @@ $(document).ready(() => {
     $("#root").append(header, gambar, form);
   };
 
-  navButtons[1].click();
+  const renderVideo = async () => {
+    $("#root").text("");
+
+    const container = $(
+      `<div class="d-flex flex-wrap justify-content-center"></div>`
+    );
+
+    const header = $(
+      `<header class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary"></header>`
+    );
+
+    const videoBaruGroup = $(
+      `<div class="input-group" style="max-width: fit-content;"></div>`
+    );
+    const vbGroupInput = $(
+      `<input type="text" placeholder="ID Video YouTube" class="form-control" style="width: 11em">`
+    );
+    const vbGroupBtn = $(
+      `<div class="input-group-append"><button class="btn btn-success"><i class="bi bi-plus"></i> Tambah Video</button></div>`
+    ).on("click", async () => {
+      const id = vbGroupInput.val();
+      if (id) {
+        await fetch(`/video/new?id=${id}`, {
+          method: "POST",
+          headers: { authorization: localStorage["token"] },
+        });
+        renderVideo();
+      } else console.log("id kosong");
+    });
+    videoBaruGroup.append(vbGroupInput, vbGroupBtn);
+
+    header.append($(`<span class="h1 px-3">Video</span>`), videoBaruGroup);
+
+    (await (await fetch("/video")).json()).forEach((video) => {
+      const wrapper = $(`<div class="d-flex flex-column m-2"></div>`);
+      const delBtn = $(
+        `<button class="btn-danger border-0 rounded-bottom p-1" style="box-sizing: border-box;"><i class="bi bi-trash"></i></button>`
+      ).on("click", async () => {
+        await fetch(`/video?id=${video.rowid}`, {
+          method: "DELETE",
+          headers: {
+            authorization: localStorage["token"],
+          },
+        });
+        renderVideo();
+      });
+      wrapper.append(
+        `<iframe src="https://www.youtube-nocookie.com/embed/${video.id}" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+        delBtn
+      );
+      container.append(wrapper);
+    });
+
+    $("#root").append(header, container);
+  };
+
+  navButtons[2].click();
 });

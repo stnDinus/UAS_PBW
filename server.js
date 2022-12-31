@@ -37,8 +37,7 @@ require("dotenv").config();
   //tabel vkegiatan
   db.run(`
   CREATE TABLE IF NOT EXISTS vkegiatan (
-    judul TEXT,
-    link TEXT
+    id TEXT
   )
 `);
   //tabel galeri
@@ -103,6 +102,9 @@ require("dotenv").config();
 
   //routing /galeri/*
   app.use("/galeri", require("./routes/galeri"));
+
+  //routing /video/*
+  app.use("/video", require("./routes/video"));
 
   const port = 80;
   app.listen(port, () => {

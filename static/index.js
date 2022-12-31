@@ -195,6 +195,15 @@ $(document).ready(() => {
     });
   };
 
+  const renderVideo = async () => {
+    (await (await fetch("/video")).json()).forEach((video) => {
+      $(`#isiVideo`).append(
+        `<iframe class="m-3" src="https://www.youtube-nocookie.com/embed/${video.id}" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width: 321px; height: 180px;"></iframe>`
+      );
+    });
+  };
+
   renderBerita();
+  renderVideo();
   renderGaleri();
 });
