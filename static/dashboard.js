@@ -353,14 +353,14 @@ $(document).ready(() => {
           const ctx = canvas.getContext("2d");
           const img = await createImageBitmap(imageFile);
 
-          let h = img.height;
           let w = img.width;
+          let h = img.height;
           const ratio = w / h;
 
-          h = 270;
-          w = 270 * ratio;
+          w = 480;
+          h = 480 * ratio;
 
-          ctx.drawImage(img, (480 - w) / 2, 0, w, h);
+          ctx.drawImage(img, 0, (280 - h) / 2, w, h);
           const thumbnail = canvas.toDataURL();
 
           fetch("/galeri/new", {

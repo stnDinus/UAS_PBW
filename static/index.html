@@ -15,25 +15,24 @@
     />
     <link rel="stylesheet" href="./index.css" />
   </head>
-  <body>
-    <div id="root" class="text-light w-80">
-      <header class="text-center">
-        <h1>Desa Karangati</h1>
-        <nav class="bg-dark d-flex w-100">
-          <a href="#">Home</a>
-          <a href="#about">Tentang Desa</a>
-          <a href="#berita">Berita</a>
-          <a href="#video">Video</a>
-          <a href="#galeri">Galeri</a>
-          <a href="#pengaduan">Pengaduan</a>
-          <a href="#kontak">Kontak</a>
-        </nav>
-      </header>
-
+  <body class="d-flex flex-column align-items-center bg-blacker text-light">
+    <header class="">
+      <h1 class="text-center bg-darker m-0">Desa Karangati</h1>
+      <nav class="position-sticky d-flex w-100" style="top: 0; z-index: 1">
+        <a href="#">Home</a>
+        <a href="#about">Tentang Desa</a>
+        <a href="#berita">Berita</a>
+        <a href="#video">Video</a>
+        <a href="#galeri">Galeri</a>
+        <a href="#pengaduan">Pengaduan</a>
+        <a href="#kontak">Kontak</a>
+      </nav>
+    </header>
+    <div id="root">
       <section id="about" class="p-3 d-flex flex-column align-items-center">
         <h2 class="m-3"><i class="bi bi-info-circle mr-2"></i>Tentang Desa</h2>
-        <h6>2022-26-12</h6>
-        <p class="text-justify">
+        <h6 class="badge bg-blue">2022-26-12</h6>
+        <p class="text-justify pb-4">
           Amet repellendus necessitatibus consectetur inventore temporibus.
           Quasi optio laudantium aliquid provident quia? Dignissimos natus
           laudantium veniam animi ratione error Magnam sed sequi tempora
@@ -48,9 +47,67 @@
         <h2>Berita</h2>
         <div
           id="isiBerita"
-          class="d-flex justify-content-center flex-wrap"
+          class="
+            d-flex
+            border-secondary border-top
+            justify-content-center
+            flex-wrap
+          "
         ></div>
       </section>
+
+      <section id="video" class="p-3 d-flex flex-column align-tiems-center">
+        <h2>Video</h2>
+        <div
+          id="isiVideo"
+          class="
+            d-flex
+            border-secondary border-top
+            justify-content-center
+            flex-wrap
+          "
+        ></div>
+      </section>
+
+      <section id="galeri" class="p-3 d-flex flex-column align-items-center">
+        <h2>Galeri</h2>
+        <div
+          id="isiGaleri"
+          class="
+            d-flex
+            justify-content-center
+            flex-wrap
+            border-top border-secondary
+          "
+        ></div>
+      </section>
+
+      <footer id="kontak" class="p-3 bg-black">
+        <div class="wrapper w-100 d-flex justify-content-between">
+          <div class="lokasi">
+            <h5>Lokasi</h5>
+            <div class="text-muted">
+              <div>Desa Karnagati</div>
+              <div>Wonosegero, 50246</div>
+              <div>Boyolali, Indonesia</div>
+            </div>
+          </div>
+          <div class="socials text-right">
+            <h5>Socials</h5>
+            <div class="text-muted d-flex flex-column">
+              <a href="facebook.com"
+                >@desa.karangati<i class="bi bi-facebook ml-2"></i
+              ></a>
+              <a href="twitter.com"
+                >@Desa_Karangati<i class="bi bi-twitter ml-2"></i
+              ></a>
+              <a href="instagram.com"
+                >@desaKarangati<i class="bi bi-instagram ml-2"></i
+              ></a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
 
     <script
