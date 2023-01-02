@@ -67,6 +67,16 @@ require("dotenv").config();
     FOREIGN KEY(beritaId) REFERENCES berita(id) ON DELETE CASCADE ON UPDATE CASCADE
   )
 `);
+  //tabel pengaduan
+  db.run(`
+  CREATE TABLE IF NOT EXISTS pengaduan (
+    oleh TEXT NOT NULL,
+    judul TEXT NOT NULL,
+    isi TEXT NOT NULL,
+    tanggal TEXT NOT NULL,
+    kategori TEXT NOT NULL
+  )
+  `);
 
   checkAuth = async (token) => {
     try {
@@ -105,6 +115,9 @@ require("dotenv").config();
 
   //routing /video/*
   app.use("/video", require("./routes/video"));
+
+  //routing /pengaduan/*
+  app.use("/pengaduan", require("./routes/pengaduan"));
 
   const port = 80;
   app.listen(port, () => {

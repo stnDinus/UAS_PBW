@@ -17,6 +17,9 @@ $(document).ready(() => {
       case "video":
         renderVideo();
         break;
+      case "pengaduan":
+        renderPengaduan();
+        break;
     }
   });
 
@@ -563,5 +566,45 @@ $(document).ready(() => {
     $("#root").append(header, container);
   };
 
-  navButtons[2].click();
+  const renderPengaduan = async () => {
+    $("#root").text("");
+
+    const container = $(`<div class="container"></div>`);
+    (
+      await (
+        await fetch("/pengaduan", {
+          headers: { authorization: localStorage["token"] },
+        })
+      ).json()
+    ).forEach((laporan) => {
+      const card = $(`
+        <div class="card bg-warning text-dark my-3">
+          <div class="card-header">
+            <h4><i class="bi bi-megaphone-fill mr-3"></i>${laporan.judul}</h4>
+          </div>
+          <div class="card-header"><i class="bi bi-calendar-fill mr-2"></i>Tanggal Kejadian: <b class="badge badge-dark">${laporan.tanggal}</b></div>
+          <div class="card-body">
+            <div class="badge badge-dark">${laporan.kategori}</div>
+            <p class="card-text">${laporan.isi}</p>
+          </div>
+        </div>
+      `);
+      const delBtn = $(
+        `<button class="btn-danger rounded-bottom border border-danger p-2"><i class="bi bi-trash"></i></button>`
+      ).on("click", async () => {
+        await fetch(`/pengaduan/${laporan.rowid}`, {
+          method: "DELETE",
+          headers: { authorization: localStorage["token"] },
+        });
+        renderPengaduan();
+      });
+      card.append(delBtn);
+
+      container.append(card);
+    });
+
+    $("#root").append(container);
+  };
+
+  navButtons[3].click();
 });

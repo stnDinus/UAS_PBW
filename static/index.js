@@ -203,7 +203,82 @@ $(document).ready(() => {
     });
   };
 
+  const renderPengaduan = async () => {
+    const judulLabel = $(`<label for="pgdnJudul">Judul</label>`);
+    const judulInput = $(
+      `<input class="form-control" id="pgdnJudul" type="text" placeholder="Judul Pengaduan">`
+    );
+    const judulGroup = $(`<div class="form-group"></div>`).append(
+      judulLabel,
+      judulInput
+    );
+    const kategoriLabel = $(`<label for="pgdnKategori">Kategori</label>`);
+    const kategoriSelect = $(`
+    <select class="form-control" id="pgdnKategori">
+      <option value="agama">Agama</option>
+      <option value="keshatan">Kesehatan</option>
+      <option value="keuangan">Keuangan</option>
+      <option value="kecelakaan">Kecelakaan</option>
+      <option value="politik">Politik</option>
+      <option value="pendidikan">Pendidikan</option>
+      <option value="kebudayaan">Kebudayaan</option>
+    </select>`);
+    const kategoriGroup = $(`<div class="form-group"></div>`).append(
+      kategoriLabel,
+      kategoriSelect
+    );
+    const isiLabel = $(`<label for="pgdnIsi">Isi</label>`);
+    const isiTextArea = $(
+      `<textarea class="form-control" id="pgdnIsi" rows="10" placeholder="Isi Pengaduan"></textarea>`
+    );
+    const isiGroup = $(`<div class="form-group"></div>`).append(
+      isiLabel,
+      isiTextArea
+    );
+    const tanggalLabel = $(`<label for="pgdnTanggal">Tanggal</label>`);
+    const tanggalInput = $(
+      `<input class="form-control" id="pgdnTanggal" type="date">`
+    );
+    const tanggalGroup = $(`<div class="form-group"></div>`).append(
+      tanggalLabel,
+      tanggalInput
+    );
+    const anonimLabel = $(`<label for="pgdnAnonim" class="m-0">Anonim</label>`);
+    const anonimInput = $(`<input id="pgdnAnonim" type="checkbox">`);
+    const lapor = $(`<button class="ml-3 btn btn-warning">Lapor</button>`).on(
+      "click",
+      async () => {
+        const response = await fetch("/pengaduan/new", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: localStorage["token"],
+          },
+          body: JSON.stringify({
+            judul: judulInput.val(),
+            kategori: kategoriSelect.val(),
+            isi: isiTextArea.val(),
+            tanggal: tanggalInput.val(),
+            anonim: anonimInput[0].checked,
+          }),
+        });
+      }
+    );
+    const laporGroup = $(
+      `<div class="d-flex align-items-center justify-content-end gap-3"></div>`
+    ).append(anonimLabel, anonimInput, lapor);
+
+    $(`#isiPengaduan`).append(
+      judulGroup,
+      kategoriGroup,
+      isiGroup,
+      tanggalGroup,
+      laporGroup
+    );
+  };
+
   renderBerita();
   renderVideo();
   renderGaleri();
+  renderPengaduan();
 });
