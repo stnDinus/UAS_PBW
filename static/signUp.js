@@ -13,17 +13,11 @@ checkUsername = async () => {
     return false;
   }
   //cek username terpakai
-  const response = await fetch("/user/checkUsernameStatus", {
+  const response = await fetch(`/user/${value}`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username: value,
-    }),
   });
   switch (response.status) {
-    case 406:
+    case 200:
       usernameWarning.textContent = "Username sudah terpakai";
       return false;
     default:

@@ -15,7 +15,8 @@ require("dotenv").config();
   db.run(`
   CREATE TABLE IF NOT EXISTS user (
     username TEXT PRIMARY KEY NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    admin INTEGER
   )
 `);
   //tabel kategori
@@ -81,14 +82,10 @@ require("dotenv").config();
   checkAuth = async (token) => {
     try {
       const status = jwt.verify(token, process.env["ACCESS_TOKEN_SECRET"]);
-      if (
-        await db.get(
-          `SELECT username FROM user WHERE username = '${status.username}'`
-        )
-      ) {
-        return status;
-      }
-      throw "username tidak ada di database";
+      const isAdmin = await db.get(
+        `SELECT admin FROM user WHERE username = '${status.username}'`
+      );
+      return { username: status.username, isAdmin: isAdmin.admin };
     } catch (error) {
       return 0;
     }

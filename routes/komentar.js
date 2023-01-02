@@ -33,8 +33,7 @@ router.post("/new", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const rowid = req.params.id;
-  const auth = req.headers.authorization;
-  if (rowid && (await checkAuth(auth))) {
+  if (rowid && (await checkAuth(req.headers.authorization))) {
     await db.run(`DELETE FROM komentar WHERE rowid = '${rowid}'`);
   }
   res.end();

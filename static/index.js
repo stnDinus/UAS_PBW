@@ -2,6 +2,222 @@ $(document).ready(() => {
   const headerHeight = $("header").height();
   $("#root").css("height", `calc(100vh - ${headerHeight}px)`);
 
+  const checkUsername = async (el, small) => {
+    const value = el.val();
+    //cek kosong
+    if (!value.length) {
+      small.text("Username tidak boleh kosong");
+      return false;
+    }
+    //cek panjang username
+    if (value.length > 12) {
+      small.text("Username tidak boleh lebih dari 12 karakter");
+      return false;
+    }
+    //cek username terpakai
+    const response = await fetch(`/user/${value}`, {
+      method: "POST",
+    });
+    switch (response.status) {
+      case 406:
+        small.text("");
+        return true;
+      default:
+        small.text("Username sudah terpakai");
+        return false;
+    }
+  };
+
+  const checkPassword = (el, small) => {
+    const password = el.val();
+    //cek kosong
+    if (!password.length) {
+      small.text("Password tidak boleh kosong");
+      return false;
+    }
+    //cek panjang password
+    if (password.length <= 6) {
+      small.text("Password harus lebih dari 6 karakter");
+      return false;
+    }
+    if (password.length > 20) {
+      small.text("Password maksimal 20 karakter");
+      return false;
+    }
+    //cek angka
+    if (!password.match(/[0-9]/g)) {
+      small.text("Password harus mengandung angka");
+      return false;
+    }
+    //cek huruf besar
+    if (!password.match(/[A-Z]/g)) {
+      small.text("Password harus mengandung huruf besar");
+      return false;
+    }
+    //cek huruf kecil
+    if (!password.match(/[a-z]/g)) {
+      small.text("Password harus mengandung huruf kecil");
+      return false;
+    }
+    small.text("");
+    return true;
+  };
+
+  const confirmPass = (passEl, conEl, small) => {
+    const password = passEl.val();
+    const confirmPassword = conEl.val();
+    //cek pasword sama
+    if (password === confirmPassword) {
+      small.text("");
+      return true;
+    } else {
+      small.text("Password tidak sama");
+      return false;
+    }
+  };
+
+  const renderLogIn = (container, modal) => {
+    container.text("");
+    const username = $(
+      `<input id="username" class="form-control" type="text" placeholder="Username">`
+    );
+    const password = $(
+      `<input id="password" class="form-control" type="password" placeholder="Password">`
+    );
+    const login = $(`<button class="btn bg-blue">Log In</button>`).on(
+      "click",
+      async () => {
+        const response = await (
+          await fetch("/user/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: username.val(),
+              password: password.val(),
+            }),
+          })
+        ).text();
+        localStorage["token"] = response;
+        modal.remove();
+        renderUser();
+      }
+    );
+    container.append(
+      $(
+        `<div class="form-group"><label for="username">Username</label></div>`
+      ).append(username),
+      $(
+        `<div class="form-group"><label for="password">Password</label></div>`
+      ).append(password),
+      $(`<div class="form-group"></div>`).append(login)
+    );
+  };
+
+  const renderSignUp = (container, modal) => {
+    container.text("");
+    const username = $(
+      `<input id="username" class="form-control" type="text" placeholder="Username">`
+    ).on("change", () => checkUsername(username, usernameSmall));
+    const usernameSmall = $(`<small></small>`);
+
+    const password = $(
+      `<input id="password" class="form-control" type="password" placeholder="Password">`
+    ).on("input", () => {
+      checkPassword(password, passwordSmall);
+      confirmPass(password, confirmPassword, confirmSmall);
+    });
+    const passwordSmall = $(`<small></small>`);
+
+    const confirmPassword = $(
+      `<input id="confirmPassword" class="form-control" type="password" placeholder="Confirm Password">`
+    ).on("input", () => confirmPass(password, confirmPassword, confirmSmall));
+    const confirmSmall = $(`<small></small>`);
+
+    const signUp = $(`<button class="btn bg-blue">Sign Up</button>`).on(
+      "click",
+      async () => {
+        const usernameStatus = await checkUsername(username, usernameSmall);
+        const passwordStatus = checkPassword(password, passwordSmall);
+        const confirmStatus = confirmPass(
+          password,
+          confirmPassword,
+          confirmSmall
+        );
+
+        console.log(usernameStatus, passwordStatus, confirmStatus);
+
+        if (usernameStatus && passwordStatus && confirmStatus) {
+          const response = await fetch("/user/new", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: username.val(),
+              password: password.val(),
+            }),
+          });
+          modal.remove();
+        }
+      }
+    );
+    container.append(
+      $(
+        `<div class="form-group"><label for="username">Username</label></div>`
+      ).append(username, usernameSmall),
+      $(
+        `<div class="form-group"><label for="password">Password</label></div>`
+      ).append(password, passwordSmall),
+      $(
+        `<div class="form-group"><label for="confirmPassword">Confirm Password</label></div>`
+      ).append(confirmPassword, confirmSmall),
+      $(`<div class="form-group"></div>`).append(signUp)
+    );
+  };
+
+  const renderUser = async () => {
+    const userDiv = $(`header .user`);
+    //check logged in
+    if (localStorage["token"]) {
+      //logged in
+    } else {
+      //!loggedn in
+      const masukBtn = $(`<button class="btn bg-blue">Masuk</button>`).on(
+        "click",
+        async () => {
+          const modal = $("<div id='modal' class='overflow-auto'></div>").on(
+            "click",
+            function (e) {
+              if (e.target === this) {
+                modal.remove();
+              }
+            }
+          );
+
+          const container = $(
+            `<div class="rounded-lg p-4 bg-dark d-flex flex-column" style="width: 400px; height: fit-content;"></div>`
+          );
+          const nav = $(`<nav class="btn-group btn-group-toggle"></nav>`);
+          const loginBtn = $(`<button class="btn bg-blue">Log In</button>`).on(
+            "click",
+            () => renderLogIn(content, modal)
+          );
+          const signUpBtn = $(
+            `<button class="btn bg-blue">Sign Up</button>`
+          ).on("click", () => renderSignUp(content, modal));
+          nav.append(loginBtn, signUpBtn);
+          const content = $(`<div></div>`);
+
+          container.append(nav, content);
+          modal.append(container);
+          $(`body`).append(modal);
+          loginBtn.click();
+        }
+      );
+      userDiv.append(masukBtn);
+    }
+  };
+
   const renderBerita = async () => {
     const berita = await (await fetch("/berita")).json();
     berita.forEach((el) => {
@@ -277,6 +493,7 @@ $(document).ready(() => {
     );
   };
 
+  renderUser();
   renderBerita();
   renderVideo();
   renderGaleri();
