@@ -23,6 +23,33 @@ $(document).ready(() => {
     }
   });
 
+  const notify = (title, message, type) => {
+    const types = {
+      danger: "220, 53, 69",
+      warning: "247, 187, 7",
+      success: "40, 167, 69",
+    };
+    const toast = $(
+      `<div class="toast ${
+        type === "danger" ? "text-light" : ""
+      }" style="opacity: 1; background-color: rgba(${types[type]}, .85)"></div>`
+    );
+    const toastHeader = $(`
+    <div class="toast-header" style="color: inherit; background-color: rgba(${types[type]}, .85)">
+      <i class="bi bi-bell-fill mr-2"></i>
+      <strong class="mr-auto">${title}</strong>
+    </div>
+    `);
+    const toastClose = $(
+      `<button class="close ml-2 mb-2"> <span aria-hidden="true">&times;</span></button>`
+    ).on("click", () => toast.remove());
+    toastHeader.append(toastClose);
+    toast.append(toastHeader, $(`<div class="toast-body">${message}</div>`));
+
+    $("#toasts").append(toast);
+    setTimeout(() => toast.remove(), 5000);
+  };
+
   const renderBerita = async () => {
     const tbody = $("<tbody></tbody>");
     const table = $(
@@ -61,7 +88,7 @@ $(document).ready(() => {
           $(
             "<button class='btn btn-danger'><i class='bi bi-trash'></i></button>"
           ).on("click", async () => {
-            await fetch("/berita", {
+            const response = await fetch("/berita", {
               method: "DELETE",
               headers: {
                 authorization: localStorage["token"],
@@ -69,7 +96,15 @@ $(document).ready(() => {
               },
               body: el.id,
             });
-            renderTbody();
+            if (response.status === 200) {
+              renderTbody();
+            } else {
+              notify(
+                "Berita",
+                "Gagal delete berita, silahkan coba lagi!",
+                "danger"
+              );
+            }
           })
         );
 
@@ -124,7 +159,18 @@ $(document).ready(() => {
       const kategori = selectKategori.val();
       const isi = textareaIsi.val();
 
-      await fetch("/berita", {
+      //cek judul
+      if (!judul) {
+        notify("Berita", "Judul berita tidak boleh kosong!", "danger");
+        return;
+      }
+      //cek isi
+      if (!isi) {
+        notify("Berita", "Isi berita tidak boleh kosong!", "danger");
+        return;
+      }
+
+      const response = await fetch("/berita", {
         method: "POST",
         headers: {
           authorization: localStorage["token"],
@@ -136,7 +182,16 @@ $(document).ready(() => {
           isi: isi,
         }),
       });
-      renderTbody();
+      if (response.status === 200) {
+        notify("Berita", "Berhasil membuat berita baru!", "success");
+        renderTbody();
+      } else {
+        notify(
+          "Berita",
+          "Gagal membuat berita baru, silahkan coba lagi!",
+          "danger"
+        );
+      }
     });
 
     form.append(groupJudul, groupKategori, groupIsi, submitButton);
@@ -203,18 +258,38 @@ $(document).ready(() => {
 
     const update = $('<button class="btn btn-primary">Update</button>');
     update.on("click", async () => {
-      await fetch(`/berita/${id}`, {
+      const judul = inputJudul.val();
+      const kategori = selectKategori.val();
+      const isi = textareaIsi.val();
+      //cek judul
+      if (!judul) {
+        notify("Berita", "Judul berita tidak boleh kosong!", "danger");
+        return;
+      }
+      //cek isi
+      if (!isi) {
+        notify("Berita", "Isi berita tidak boleh koson!", "danger");
+      }
+      const response = await fetch(`/berita/${id}`, {
         method: "PUT",
         headers: {
           authorization: localStorage["token"],
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          judul: inputJudul.val(),
-          kategori: selectKategori.val(),
-          isi: textareaIsi.val(),
+          judul: judul,
+          kategori: kategori,
+          isi: isi,
         }),
       });
+      if (response.status === 200)
+        notify("Berita", "Berita berhasil di perbarui!", "success");
+      else
+        notify(
+          "Berita",
+          "Berita gagal di perbarui, silahkan coba lagi!",
+          "danger"
+        );
     });
 
     form.append(groupJudul, groupKategori, groupIsi, update);
@@ -243,12 +318,18 @@ $(document).ready(() => {
           $(
             '<button class="btn ml-3 btn-danger"><i class="bi bi-trash"></i></button>'
           ).on("click", async () => {
-            await fetch(`/komentar/${el.rowid}`, {
+            const response = await fetch(`/komentar/${el.rowid}`, {
               method: "DELETE",
               headers: {
                 authorization: localStorage["token"],
               },
             });
+            if (response.status !== 200)
+              notify(
+                "Komentar",
+                "Komentar gagal dihapus, silahkan coba lagi!",
+                "danger"
+              );
             container.text("");
             renderKomentar();
           })
@@ -336,15 +417,15 @@ $(document).ready(() => {
 
         //cek input kosong
         if (!nama) {
-          console.log("nama kosong");
+          notify("Galeri", "Nama gambar tidak boleh kosong!", "danger");
           return;
         }
         if (!deskripsi) {
-          console.log("deskripsi kosong");
+          notify("Galeri", "Deskripsi gambar tidak boleh kosong!", "danger");
           return;
         }
         if (!imageFile) {
-          console.log("gambar kosong");
+          notify("Galeri", "Gambar tidak boleh kosong!", "danger");
           return;
         }
 
@@ -369,7 +450,7 @@ $(document).ready(() => {
           ctx.drawImage(img, 0, (280 - h) / 2, w, h);
           const thumbnail = canvas.toDataURL();
 
-          fetch("/galeri/new", {
+          const response = await fetch("/galeri/new", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -382,6 +463,17 @@ $(document).ready(() => {
               deskripsi: deskripsi,
             }),
           });
+          if (response.status === 200) {
+            notify("Galeri", "Gambar berhasil di tambah!", "success");
+            $("#root").text("");
+            renderGaleri();
+          } else {
+            notify(
+              "Galeri",
+              "Gambar gagal di tambah, silahkan coba lagi!",
+              "danger"
+            );
+          }
         };
       }
     );
@@ -399,17 +491,13 @@ $(document).ready(() => {
     const thumbnails = await (await fetch("/galeri")).json();
 
     thumbnails.forEach((thumbnail) => {
-      const card = $(
-        `<div class="card w-25 m-3 bg-dark" style="cursor: pointer;"></div>`
-      ).on("click", (e) => {
-        e.target !== cardDelete[0] && renderGambar(thumbnail.rowid);
-      });
+      const card = $(`<div class="card w-25 m-3 bg-dark""></div>`);
       const cardImage = $(
         `<img class="card-img-top bg-black" src="${thumbnail.thumbnail}">`
       );
       const cardBody = $(`<div class="card-body"></div>`);
       const cardTitle = $(
-        `<div class="d-flex justify-content-between align-items-center card-title border-secondary border-bottom pb-2 h5">${thumbnail.nama}</div>`
+        `<div class="d-flex justify-content-between align-items-center card-title border-secondary border-bottom pb-2 h5"></div>`
       );
       const cardText = $(
         `<div class="card-text text-muted">${thumbnail.deskripsi.slice(0, 40)}${
@@ -420,16 +508,30 @@ $(document).ready(() => {
       const cardDelete = $(
         `<button class="btn btn-danger"><i class='bi bi-trash'></i></button>`
       ).on("click", async () => {
-        await fetch(`/galeri/${thumbnail.rowid}`, {
+        const response = await fetch(`/galeri/${thumbnail.rowid}`, {
           method: "DELETE",
           headers: {
             authorization: localStorage["token"],
           },
         });
-        $("#root").text("");
-        renderGaleri();
+        if (response.status === 200) {
+          $("#root").text("");
+          renderGaleri();
+        } else {
+          notify(
+            "Galeri",
+            "Gambar gagal di hapus, silahkan coba lagi!",
+            "danger"
+          );
+        }
       });
-      cardTitle.append(cardDelete);
+      cardTitle.append(
+        $(`<div style="cursor: pointer">${thumbnail.nama}</div>`).on(
+          "click",
+          () => renderGambar(thumbnail.rowid)
+        ),
+        cardDelete
+      );
       cardBody.append(cardTitle, cardText);
       card.append(cardImage, cardBody);
       container.append(card);
@@ -484,17 +586,18 @@ $(document).ready(() => {
         const nama = inputNama.val();
         const deskripsi = inputDeskripsi.val();
 
-        //cek kosong
+        //cek nama
         if (!nama) {
-          console.log("nama kosong");
+          notify("Galeri", "Nama gambar tidak boleh kosong!", "danger");
           return;
         }
+        //cek deskripsi
         if (!deskripsi) {
-          console.log("deskripsi kosong");
+          notify("Galeri", "Deskripsi gambar tidak boleh kosong!", "danger");
           return;
         }
 
-        await fetch(`/galeri/${response.rowid}`, {
+        const response2 = await fetch(`/galeri/${response.rowid}`, {
           method: "PUT",
           headers: {
             authorization: localStorage["token"],
@@ -505,6 +608,15 @@ $(document).ready(() => {
             deskripsi: deskripsi,
           }),
         });
+        if (response2.status === 200) {
+          notify("Galeri", "Gambar berhasil di perbarui!", "success");
+        } else {
+          notify(
+            "Galeri",
+            "Gambar gagal di perbarui, silahkan coba lagi!",
+            "danger"
+          );
+        }
       }
     );
     form.append(groupNama, groupDeskripsi, update);
@@ -534,11 +646,17 @@ $(document).ready(() => {
     ).on("click", async () => {
       const id = vbGroupInput.val();
       if (id) {
-        await fetch(`/video/new?id=${id}`, {
+        const response = await fetch(`/video/new?id=${id}`, {
           method: "POST",
           headers: { authorization: localStorage["token"] },
         });
-        renderVideo();
+        if (response.status === 200) renderVideo();
+        else
+          notify(
+            "Video",
+            "Video gagal di tambah, silahkan coba lagi",
+            "danger"
+          );
       } else console.log("id kosong");
     });
     videoBaruGroup.append(vbGroupInput, vbGroupBtn);
@@ -550,13 +668,17 @@ $(document).ready(() => {
       const delBtn = $(
         `<button class="btn-danger border-0 rounded-bottom p-1" style="box-sizing: border-box;"><i class="bi bi-trash"></i></button>`
       ).on("click", async () => {
-        await fetch(`/video?id=${video.rowid}`, {
+        const response = await fetch(`/video?id=${video.rowid}`, {
           method: "DELETE",
           headers: {
             authorization: localStorage["token"],
           },
         });
-        renderVideo();
+        if (response.status === 200) {
+          renderVideo();
+        } else {
+          notify("Video", "Video gagal dihapus, silahkan coba lagi!", "danger");
+        }
       });
       wrapper.append(
         `<iframe src="https://www.youtube-nocookie.com/embed/${video.id}" title="YouTube video player" frameborder="0" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
@@ -597,11 +719,19 @@ $(document).ready(() => {
       const delBtn = $(
         `<button class="btn-danger rounded-bottom border border-danger p-2"><i class="bi bi-trash"></i></button>`
       ).on("click", async () => {
-        await fetch(`/pengaduan/${laporan.rowid}`, {
+        const response = await fetch(`/pengaduan/${laporan.rowid}`, {
           method: "DELETE",
           headers: { authorization: localStorage["token"] },
         });
-        renderPengaduan();
+        if (response.status === 200) {
+          renderPengaduan();
+        } else {
+          notify(
+            "Pengaduan",
+            "Laporan gagal di hapus, silahkan coba lagi!",
+            "danger"
+          );
+        }
       });
       card.append(delBtn);
 
@@ -611,5 +741,5 @@ $(document).ready(() => {
     $("#root").append(container);
   };
 
-  navButtons[3].click();
+  navButtons[0].click();
 });

@@ -37,9 +37,11 @@ router.post("/new", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const rowid = req.params.id;
   if (rowid && (await checkAuth(req.headers.authorization)).admin === 1) {
-    await db.run(`DELETE FROM komentar WHERE rowid = ?`, [id]);
+    await db.run(`DELETE FROM komentar WHERE rowid = ?`, [rowid]);
+    res.end();
+  } else {
+    res.sendStatus(403);
   }
-  res.end();
 });
 
 module.exports = router;
