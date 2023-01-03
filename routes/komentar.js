@@ -30,8 +30,10 @@ router.post("/new", async (req, res) => {
         beritaId,
         isi,
       ]));
+    res.end();
+  } else {
+    res.sendStatus(403);
   }
-  res.end();
 });
 
 router.delete("/:id", async (req, res) => {

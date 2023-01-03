@@ -2,6 +2,33 @@ $(document).ready(() => {
   const headerHeight = $("header").height();
   $("#root").css("height", `calc(100vh - ${headerHeight}px)`);
 
+  const notify = (title, message, type) => {
+    const types = {
+      danger: "220, 53, 69",
+      warning: "247, 187, 7",
+      success: "40, 167, 69",
+    };
+    const toast = $(
+      `<div class="toast ${
+        type === "danger" ? "text-light" : ""
+      }" style="opacity: 1; background-color: rgba(${types[type]}, .85)"></div>`
+    );
+    const toastHeader = $(`
+    <div class="toast-header" style="color: inherit; background-color: rgba(${types[type]}, .85)">
+      <i class="bi bi-bell-fill mr-2"></i>
+      <strong class="mr-auto">${title}</strong>
+    </div>
+    `);
+    const toastClose = $(
+      `<button class="close ml-2 mb-2"> <span aria-hidden="true">&times;</span></button>`
+    ).on("click", () => toast.remove());
+    toastHeader.append(toastClose);
+    toast.append(toastHeader, $(`<div class="toast-body">${message}</div>`));
+
+    $("#toasts").append(toast);
+    setTimeout(() => toast.remove(), 5000);
+  };
+
   const checkUsername = async (el, small) => {
     const value = el.val();
     //cek kosong
@@ -100,6 +127,8 @@ $(document).ready(() => {
           localStorage["username"] = username.val();
           modal.remove();
           renderUser();
+        } else {
+          notify("Login", "Usernam atau Password salah!", "danger");
         }
       }
     );
@@ -119,7 +148,7 @@ $(document).ready(() => {
     const username = $(
       `<input id="username" class="form-control" type="text" placeholder="Username">`
     ).on("change", () => checkUsername(username, usernameSmall));
-    const usernameSmall = $(`<small></small>`);
+    const usernameSmall = $(`<small class="text-danger"></small>`);
 
     const password = $(
       `<input id="password" class="form-control" type="password" placeholder="Password">`
@@ -127,12 +156,12 @@ $(document).ready(() => {
       checkPassword(password, passwordSmall);
       confirmPass(password, confirmPassword, confirmSmall);
     });
-    const passwordSmall = $(`<small></small>`);
+    const passwordSmall = $(`<small class="text-danger"></small>`);
 
     const confirmPassword = $(
       `<input id="confirmPassword" class="form-control" type="password" placeholder="Confirm Password">`
     ).on("input", () => confirmPass(password, confirmPassword, confirmSmall));
-    const confirmSmall = $(`<small></small>`);
+    const confirmSmall = $(`<small class="text-danger"></small>`);
 
     const signUp = $(`<button class="btn bg-blue">Sign Up</button>`).on(
       "click",
@@ -295,7 +324,12 @@ $(document).ready(() => {
           const buttonKomentar = $(
             '<button class="btn btn-primary mt-3">Kirim</button>'
           ).on("click", async () => {
-            await fetch(`/komentar/new`, {
+            const isi = isiKomentar.val();
+            //cek isi
+            if (!isi) {
+              return;
+            }
+            const response = await fetch(`/komentar/new`, {
               method: "POST",
               headers: {
                 authorization: localStorage["token"],
@@ -303,13 +337,20 @@ $(document).ready(() => {
               },
               body: JSON.stringify({
                 beritaId: berita.id,
-                isi: isiKomentar.val(),
+                isi: isi,
               }),
             });
-            komentarContainer.text("");
-            renderKomentar();
-
-            isiKomentar.val("");
+            if (response.status === 200) {
+              komentarContainer.text("");
+              renderKomentar();
+              isiKomentar.val("");
+            } else {
+              notify(
+                "Komentar",
+                "Silahkan login untuk mengisi komentar!",
+                "danger"
+              );
+            }
           });
           const komentarBaru = $(
             `<div class='d-flex flex-column align-items-start'></div>`
@@ -492,6 +533,28 @@ $(document).ready(() => {
     const lapor = $(`<button class="ml-3 btn btn-warning">Lapor</button>`).on(
       "click",
       async () => {
+        const judul = judulInput.val();
+        const kategori = kategoriSelect.val();
+        const isi = isiTextArea.val();
+        const tanggal = tanggalInput.val();
+        const anonim = anonimInput[0].checked;
+
+        //cek judul
+        if (!judul) {
+          notify("Pengaduan", "Judul laporan tidak boleh kosong!", "danger");
+          return;
+        }
+        //cek isi
+        if (!isi) {
+          notify("Pengaduan", "Isi laporan tidak boleh kosong!", "danger");
+          return;
+        }
+        //tanggal
+        if (!tanggal) {
+          notify("Pengaduan", "Tanggal laporan tidak boleh kosong!", "danger");
+          return;
+        }
+
         const response = await fetch("/pengaduan/new", {
           method: "POST",
           headers: {
@@ -499,13 +562,22 @@ $(document).ready(() => {
             authorization: localStorage["token"],
           },
           body: JSON.stringify({
-            judul: judulInput.val(),
-            kategori: kategoriSelect.val(),
-            isi: isiTextArea.val(),
-            tanggal: tanggalInput.val(),
-            anonim: anonimInput[0].checked,
+            judul: judul,
+            kategori: kategori,
+            isi: isi,
+            tanggal: tanggal,
+            anonim: anonim,
           }),
         });
+        if (response.status === 200) {
+          notify("Pengaduan", "Laporan berhasil di laporkan!", "success");
+        } else {
+          notify(
+            "Pengaduan",
+            "Silahkan login untuk membuat laporan pengaduan",
+            "danger"
+          );
+        }
       }
     );
     const laporGroup = $(
