@@ -85,7 +85,7 @@ require("dotenv").config();
       const isAdmin = await db.get(
         `SELECT admin FROM user WHERE username = '${status.username}'`
       );
-      return { username: status.username, isAdmin: isAdmin.admin };
+      return { username: status.username, admin: isAdmin.admin };
     } catch (error) {
       return 0;
     }

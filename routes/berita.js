@@ -32,11 +32,12 @@ router.post("/", async (req, res) => {
     res.sendStatus(400);
     return;
   }
-  //cek error
-  if (await checkAuth(token)) {
+  //cek admin
+  if ((await checkAuth(token)).admin === 1) {
     try {
       await db.run(
-        `INSERT INTO berita (judul, kategori, isi) VALUES ('${judul}', '${kategori}', '${isi}')`
+        `INSERT INTO berita (judul, kategori, isi) VALUES (?, ?, ?)`,
+        [judul, kategori, isi]
       );
     } catch (error) {
       switch (error.errno) {
@@ -55,10 +56,10 @@ router.post("/", async (req, res) => {
 //hapus berita
 router.delete("/", async (req, res) => {
   const token = req.headers.authorization;
-  if (await checkAuth(token)) {
+  if ((await checkAuth(token)).admin === 1) {
     const id = req.body;
     try {
-      await db.run(`DELETE FROM berita WHERE id = '${id}'`);
+      await db.run(`DELETE FROM berita WHERE id = ?`, [id]);
     } catch {
       res.sendStatus(400);
       return;
@@ -71,24 +72,27 @@ router.delete("/", async (req, res) => {
 
 //lihat berita
 router.get("/:id", async (req, res) => {
-  const berita = await db.get(
-    `SELECT * FROM berita WHERE id = '${req.params.id}'`
-  );
+  const berita = await db.get(`SELECT * FROM berita WHERE id = ?`, [
+    req.params.id,
+  ]);
   res.json(berita);
 });
 
 //update berita
 router.put("/:id", async (req, res) => {
-  if (checkAuth(req.headers.authorization)) {
+  if ((await checkAuth(req.headers.authorization)).admin === 1) {
     const id = req.params.id;
     const judul = req.body.judul;
     const kategori = req.body.kategori;
     const isi = req.body.isi;
 
-    db.run(`
+    db.run(
+      `
     UPDATE berita
-    SET judul = '${judul}', kategori = '${kategori}', isi = '${isi}'
-    WHERE id = '${id}'`);
+    SET judul = ?, kategori = ?, isi = ?
+    WHERE id = ?`,
+      [judul, kategori, isi, id]
+    );
     res.sendStatus(200);
   } else {
     res.sendStatus(401);

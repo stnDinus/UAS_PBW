@@ -11,8 +11,8 @@ router.get("/", async (req, res) => {
 
 router.post("/new", async (req, res) => {
   const id = req.query.id;
-  if (id && (await checkAuth(req.headers.authorization))) {
-    await db.run(`INSERT INTO vkegiatan VALUES ('${id}')`);
+  if (id && (await checkAuth(req.headers.authorization)).admin === 1) {
+    await db.run(`INSERT INTO vkegiatan VALUES (?)`, [id]);
     res.sendStatus(200);
   } else {
     res.sendStatus(403);
@@ -21,8 +21,8 @@ router.post("/new", async (req, res) => {
 
 router.delete("/", async (req, res) => {
   const id = req.query.id;
-  if (id && (await checkAuth(req.headers.authorization))) {
-    await db.run(`DELETE FROM vkegiatan WHERE rowid = '${id}'`);
+  if (id && (await checkAuth(req.headers.authorization)).admin === 1) {
+    await db.run(`DELETE FROM vkegiatan WHERE rowid = ?`, [id]);
     res.sendStatus(200);
   } else {
     res.sendStatus(403);

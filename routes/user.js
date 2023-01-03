@@ -8,9 +8,9 @@ require("dotenv").config();
 router.use(express.json());
 
 checkUsername = async (username) => {
-  return await db.get(
-    `SELECT username FROM user WHERE username = '${username}'`
-  );
+  return await db.get(`SELECT username FROM user WHERE username = ?`, [
+    username,
+  ]);
 };
 
 router.post("/new", async (req, res) => {
@@ -29,7 +29,7 @@ router.post("/new", async (req, res) => {
   if (usernameStatus && passwordStatus) {
     //hash password
     const hash = await bcrypt.hash(password, 10);
-    await db.run(`INSERT INTO user VALUES ('${username}', '${hash}', null)`);
+    await db.run(`INSERT INTO user VALUES (?, ?, null)`, [username, hash]);
     res.sendStatus(200);
   } else {
     res.sendStatus(406);
@@ -41,10 +41,11 @@ router.post("/login", async (req, res) => {
   const inputPassword = req.body.password;
 
   const password = await db.get(
-    `SELECT password FROM user WHERE username = '${inputUsername}'`
+    `SELECT password FROM user WHERE username = ?`,
+    [inputUsername]
   );
 
-  if (await bcrypt.compare(inputPassword, password.password)) {
+  if (password && (await bcrypt.compare(inputPassword, password.password))) {
     const accessToken = jwt.sign(
       { username: inputUsername },
       process.env["ACCESS_TOKEN_SECRET"]

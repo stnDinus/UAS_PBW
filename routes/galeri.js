@@ -13,10 +13,19 @@ router.post("/new", async (req, res) => {
   const thumbnail = req.body.thumbnail;
   const deskripsi = req.body.deskripsi;
 
-  if (nama && image && thumbnail && deskripsi && (await checkAuth(token))) {
-    await db.run(
-      `INSERT INTO galeri VALUES ('${nama}', '${image}', '${thumbnail}', '${deskripsi}')`
-    );
+  if (
+    nama &&
+    image &&
+    thumbnail &&
+    deskripsi &&
+    (await checkAuth(token)).admin === 1
+  ) {
+    await db.run(`INSERT INTO galeri VALUES (?, ?, ?, ?)`, [
+      nama,
+      image,
+      thumbnail,
+      deskripsi,
+    ]);
     res.sendStatus(200);
     return;
   }
@@ -34,9 +43,9 @@ router.get("/", async (req, res) => {
 
 //delete gambar
 router.delete("/:id", async (req, res) => {
-  if (await checkAuth(req.headers.authorization)) {
+  if ((await checkAuth(req.headers.authorization)).admin === 1) {
     res.json(
-      await db.get(`DELETE FROM galeri WHERE rowid = '${req.params.id}'`)
+      await db.get(`DELETE FROM galeri WHERE rowid = ?`, [req.params.id])
     );
   } else {
     res.sendStatus(403);
@@ -45,10 +54,12 @@ router.delete("/:id", async (req, res) => {
 
 //edit gambar
 router.put("/:id", async (req, res) => {
-  if (await checkAuth(req.headers.authorization)) {
-    db.run(
-      `UPDATE galeri SET nama = '${req.body.nama}', deskripsi = '${req.body.deskripsi}' WHERE rowid = ${req.params.id}`
-    );
+  if ((await checkAuth(req.headers.authorization)).admin === 1) {
+    db.run(`UPDATE galeri SET nama = ?, deskripsi = ? WHERE rowid = ?`, [
+      req.body.nama,
+      req.body.deskripsi,
+      req.params.id,
+    ]);
     res.end();
   } else {
     res.sendStatus(403);
@@ -59,9 +70,9 @@ router.put("/:id", async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     res.json(
-      await db.get(
-        `SELECT rowid, * FROM galeri WHERE rowid = '${req.params.id}'`
-      )
+      await db.get(`SELECT rowid, * FROM galeri WHERE rowid = ?`, [
+        req.params.id,
+      ])
     );
   } catch {
     res.sendStatus(404);

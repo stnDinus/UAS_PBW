@@ -87,19 +87,20 @@ $(document).ready(() => {
     const login = $(`<button class="btn bg-blue">Log In</button>`).on(
       "click",
       async () => {
-        const response = await (
-          await fetch("/user/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username: username.val(),
-              password: password.val(),
-            }),
-          })
-        ).text();
-        localStorage["token"] = response;
-        modal.remove();
-        renderUser();
+        const response = await fetch("/user/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username.val(),
+            password: password.val(),
+          }),
+        });
+        if (response.status === 200) {
+          localStorage["token"] = await response.text();
+          localStorage["username"] = username.val();
+          modal.remove();
+          renderUser();
+        }
       }
     );
     container.append(
@@ -144,8 +145,6 @@ $(document).ready(() => {
           confirmSmall
         );
 
-        console.log(usernameStatus, passwordStatus, confirmStatus);
-
         if (usernameStatus && passwordStatus && confirmStatus) {
           const response = await fetch("/user/new", {
             method: "POST",
@@ -157,7 +156,10 @@ $(document).ready(() => {
               password: password.val(),
             }),
           });
-          modal.remove();
+          if (response.status === 200) {
+            modal.remove();
+            renderUser();
+          }
         }
       }
     );
@@ -177,9 +179,28 @@ $(document).ready(() => {
 
   const renderUser = async () => {
     const userDiv = $(`header .user`);
+    userDiv.text("");
     //check logged in
     if (localStorage["token"]) {
       //logged in
+      const username = $(`<b>${localStorage["username"]}</b>`);
+      const keluarBtn = $(
+        `<div class="badge badge-danger" style="cursor: pointer">Keluar</div>`
+      ).on("click", () => {
+        localStorage.clear();
+        renderUser();
+      });
+      userDiv.append(
+        $("<div class='d-flex align-items-center'></div>").append(
+          $(
+            `<i class="bi bi-person-circle mr-2" style="font-size: 30px;"></i>`
+          ),
+          $(`<div class="d-flex flex-column align-items-end"></div>`).append(
+            username,
+            keluarBtn
+          )
+        )
+      );
     } else {
       //!loggedn in
       const masukBtn = $(`<button class="btn bg-blue">Masuk</button>`).on(
@@ -197,14 +218,21 @@ $(document).ready(() => {
           const container = $(
             `<div class="rounded-lg p-4 bg-dark d-flex flex-column" style="width: 400px; height: fit-content;"></div>`
           );
-          const nav = $(`<nav class="btn-group btn-group-toggle"></nav>`);
-          const loginBtn = $(`<button class="btn bg-blue">Log In</button>`).on(
-            "click",
-            () => renderLogIn(content, modal)
-          );
+          const nav = $(`<nav class="btn-group btn-group-toggle mb-2"></nav>`);
+          const loginBtn = $(
+            `<button class="btn btn-secondary">Log In</button>`
+          ).on("click", () => {
+            loginBtn.addClass("bg-blue");
+            signUpBtn.removeClass("bg-blue");
+            renderLogIn(content, modal);
+          });
           const signUpBtn = $(
-            `<button class="btn bg-blue">Sign Up</button>`
-          ).on("click", () => renderSignUp(content, modal));
+            `<button class="btn btn-secondary">Sign Up</button>`
+          ).on("click", () => {
+            signUpBtn.addClass("bg-blue");
+            loginBtn.removeClass("bg-blue");
+            renderSignUp(content, modal);
+          });
           nav.append(loginBtn, signUpBtn);
           const content = $(`<div></div>`);
 

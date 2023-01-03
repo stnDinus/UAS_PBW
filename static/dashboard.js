@@ -401,7 +401,9 @@ $(document).ready(() => {
     thumbnails.forEach((thumbnail) => {
       const card = $(
         `<div class="card w-25 m-3 bg-dark" style="cursor: pointer;"></div>`
-      ).on("click", () => renderGambar(thumbnail.rowid));
+      ).on("click", (e) => {
+        e.target !== cardDelete[0] && renderGambar(thumbnail.rowid);
+      });
       const cardImage = $(
         `<img class="card-img-top bg-black" src="${thumbnail.thumbnail}">`
       );
@@ -582,7 +584,10 @@ $(document).ready(() => {
           <div class="card-header">
             <h4><i class="bi bi-megaphone-fill mr-3"></i>${laporan.judul}</h4>
           </div>
-          <div class="card-header"><i class="bi bi-calendar-fill mr-2"></i>Tanggal Kejadian: <b class="badge badge-dark">${laporan.tanggal}</b></div>
+          <div class="card-header d-flex justify-content-between">
+            <div><i class="bi bi-person-circle mr-2"></i><b>${laporan.oleh}</b></div>
+            <div><i class="bi bi-calendar-fill mr-2"></i><b>${laporan.tanggal}</b></div>
+          </div>
           <div class="card-body">
             <div class="badge badge-dark">${laporan.kategori}</div>
             <p class="card-text">${laporan.isi}</p>

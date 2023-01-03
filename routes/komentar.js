@@ -8,7 +8,8 @@ router.get("/", async (req, res) => {
   const beritaId = req.query.beritaId;
   if (beritaId) {
     const komentar = await db.all(
-      `SELECT rowid, * FROM komentar WHERE beritaId = '${beritaId}'`
+      `SELECT rowid, * FROM komentar WHERE beritaId = ?`,
+      [beritaId]
     );
     res.json(komentar);
   } else {
@@ -24,17 +25,19 @@ router.post("/new", async (req, res) => {
     const isi = req.body.isi;
 
     isi &&
-      (await db.run(
-        `INSERT INTO komentar VALUES ('${oleh}', '${beritaId}', '${isi}', datetime('now'))`
-      ));
+      (await db.run(`INSERT INTO komentar VALUES (?, ?, ?, datetime('now'))`, [
+        oleh,
+        beritaId,
+        isi,
+      ]));
   }
   res.end();
 });
 
 router.delete("/:id", async (req, res) => {
   const rowid = req.params.id;
-  if (rowid && (await checkAuth(req.headers.authorization))) {
-    await db.run(`DELETE FROM komentar WHERE rowid = '${rowid}'`);
+  if (rowid && (await checkAuth(req.headers.authorization)).admin === 1) {
+    await db.run(`DELETE FROM komentar WHERE rowid = ?`, [id]);
   }
   res.end();
 });
