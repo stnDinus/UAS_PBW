@@ -40,22 +40,23 @@ router.post("/login", async (req, res) => {
   const inputUsername = req.body.username;
   const inputPassword = req.body.password;
 
-  const password = await db.get(
-    `SELECT password FROM user WHERE username = ?`,
+  const user = await db.get(
+    `SELECT admin, password FROM user WHERE username = ?`,
     [inputUsername]
   );
 
-  if (password && (await bcrypt.compare(inputPassword, password.password))) {
+  if (user && (await bcrypt.compare(inputPassword, user.password))) {
     const accessToken = jwt.sign(
       { username: inputUsername },
       process.env["ACCESS_TOKEN_SECRET"]
     );
-    res.send(accessToken);
+    res.json({ accessToken: accessToken, admin: user.admin });
   } else {
     res.sendStatus(406);
   }
 });
 
+//cek username terpakai
 router.post("/:user", async (req, res) => {
   (await checkUsername(req.params.user))
     ? res.sendStatus(200)

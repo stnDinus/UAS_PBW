@@ -123,7 +123,9 @@ $(document).ready(() => {
           }),
         });
         if (response.status === 200) {
-          localStorage["token"] = await response.text();
+          const responseJson = await response.json();
+          localStorage["token"] = responseJson.accessToken;
+          localStorage["admin"] = responseJson.admin;
           localStorage["username"] = username.val();
           modal.remove();
           renderUser();
@@ -214,7 +216,7 @@ $(document).ready(() => {
       //logged in
       const username = $(`<b>${localStorage["username"]}</b>`);
       const keluarBtn = $(
-        `<div class="badge badge-danger" style="cursor: pointer">Keluar</div>`
+        `<a class="badge badge-danger" style="cursor: pointer">Keluar</a>`
       ).on("click", () => {
         localStorage.clear();
         renderUser();
@@ -224,9 +226,15 @@ $(document).ready(() => {
           $(
             `<i class="bi bi-person-circle mr-2" style="font-size: 30px;"></i>`
           ),
-          $(`<div class="d-flex flex-column align-items-end"></div>`).append(
+          $(`<div class="d-flex flex-column align-items-center"></div>`).append(
             username,
-            keluarBtn
+            $(
+              `<div>${
+                localStorage["admin"] === "1"
+                  ? "<a href='/dashboard.html' class='badge badge-warning mr-2'>Dashboard</a>"
+                  : ""
+              }</div>`
+            ).append(keluarBtn)
           )
         )
       );
