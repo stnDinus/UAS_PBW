@@ -116,9 +116,18 @@ require("dotenv").config();
   //routing /pengaduan/*
   app.use("/pengaduan", require("./routes/pengaduan"));
 
-  const port = 80;
-  app.listen(port, () => {
+  //TLS certs
+  const fs = require("node:fs")
+  const https = require("node:https");
+  const fullchain = fs.readFileSync(process.env["FULLCHAIN"])
+  const privkey = fs.readFileSync(process.env["PRIVKEY"])
+
+  const port = 443;
+  https.createServer({
+    key: privkey,
+    cert: fullchain
+  }, app).listen(port, () => {
     console.clear();
     console.log("Server Berjalan pada port: ", port);
-  });
+  })
 })();
